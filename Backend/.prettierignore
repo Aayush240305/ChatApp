@@ -1,0 +1,37 @@
+# Node modules
+node_modules
+
+# Build output
+dist
+build
+out
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Coverage reports
+coverage
+
+# Git files
+.git
+.gitignore
+
+# IDE/editor folders
+.vscode
+.idea
+
+# Public assets (optional)
+public
+
+# Other specific files/folders
+*.min.js
+*.bundle.js
