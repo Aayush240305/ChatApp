@@ -2,12 +2,46 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { toast } from 'react-toastify';
 import { useNavigate, Link } from 'react-router-dom';
+import { io } from "socket.io-client";
+
 
 export default function Home() {
   const [Users, setUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [status, setStatus] = useState(false)
   const navigate = useNavigate();
+  const [user, setUser] = useState(null);
+  const[online, setOnline] = useState([])
+  
+    useEffect(()=>{
+      async function fetchUser() {
+      try {
+        const res = await axios.get("/chatApp/api/v1/user/getUser");
+        setUser(res.data.data);
+       } catch (err) {
+        console.error("Error fetching user:", err);
+      }
+    }
+    fetchUser();
+  },[])
+  
+useEffect(()=>{
+  if(!user) return;
+    const socket = io('http://localhost:4000', {
+     withCredentials: true,
+     auth:{
+      id : user._id
+    }
+  });
+    socket.on("connect", () => {
+      console.log("Connected to server:", socket.id)
+    })
+  socket.on("disconnect",()=>{
+     console.log("disConnected to server:", socket.id)
+   })
+   socket.on("online", id => setOnline(prev => [...prev, id]));
+   socket.on("offline", id => setOnline(prev => prev.filter(u => u !== id)));
+  },[user])
 
   useEffect(() => {
     async function fetchUsers() {
@@ -55,7 +89,7 @@ export default function Home() {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <img class="w-10 h-10 rounded-full" src={user.profilePhoto} alt="" />
-                    <span className={`top-0 left-7 absolute  w-3.5 h-3.5  border-2 border-white dark:border-gray-800 rounded-full ${status?"bg-gray-400":"bg-green-400"
+                    <span className={`top-0 left-7 absolute  w-3.5 h-3.5  border-2 border-white dark:border-gray-800 rounded-full ${online.includes(user._id)?"bg-green-400":"bg-gray-400"
                     }`}></span>
                    </div>
                   <div>
