@@ -153,13 +153,15 @@ const getMessages = asyncHandler(async(req, res)=>{
    
    const requestedUser = await User.findById(id).select("-password -refreshToken")
    
+   const MyId = req.user._id;
+   
    if(!requestedUser){
      throw new ApiError(404, "user not found")
    }
   
   res
   .status(200)
-  .json(new ApiResponse(200, requestedUser, "User fetched successfully"))
+  .json(new ApiResponse(200, {requestedUser,MyId}, "User fetched successfully"))
 })
 
 export {

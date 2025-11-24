@@ -29,14 +29,32 @@ connectDB()
 })
 
 io.on("connection", (socket) => {
-  const id = socket.handshake.auth.id
-  console.log("User connected:",socket.id,id)
-  io.emit("online", id)
+  const id = socket.handshake.auth.id;
+  console.log("User connected:", socket.id, "userId:", id);
 
-socket.on("disconnect",() =>{
-  console.log("User disconnected:", socket.id)
-  io.emit("offline",id)
- })
-})
+  if (!id) return;
+
+  // प्रत्येक user ला त्याचा स्वतःचा room
+  socket.join(id);
+
+  // online broadcast
+  io.emit("online", id);
+
+  // 🔹 private message event
+  socket.on("send_message", (data) => {
+    const { senderId, receiverId, text, createdAt } = data;
+    console.log("Message:", data);
+
+    // इथे DB मध्ये save करू शकतोस (Mongo वगैरे)
+
+    // receiver च्या room ला message पाठव
+    io.to(receiverId).emit("receive_message", data);
+  });
+
+  socket.on("disconnect", () => {
+    console.log("User disconnected:", socket.id);
+    io.emit("offline", id);
+  });
+});
   
 
